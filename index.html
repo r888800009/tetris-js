@@ -252,10 +252,15 @@ function keyDown(e){
         if (keyBool[e.keyCode] == false) {
             keyBool[e.keyCode] == true;
             console.log("keyDown");
-            if (e.keyCode=='38')   //up
+            
+            if([38, 40, 37, 39].indexOf(e.keyCode) > -1) {
+                e.preventDefault();
+            }
+
+            if (e.keyCode == '38') //up
                 rotate();
             
-            if (e.keyCode=='40')   //down
+            if (e.keyCode == '40') //down
                 moveDown();
             
             if (e.keyCode == '37') //left
