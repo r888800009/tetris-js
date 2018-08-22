@@ -5,14 +5,27 @@ var sct;
 var w = 600, h = 600;  
 var BlockSize = 20;
 var fps = 100.0;
-var backGround = "#555555";
-var noBlockColor = "#222222";
-var blockColor = "#22FFFF";
-var blockBackGroundColor = "#000000";
-var gameW = 10, gameH = 20, gameX = 10, gameY = 10;
-var readyDisplayX = (gameW + 1) * BlockSize, readyDisplayY = gameY;
-var game, gameStart = true;
-var timerGame;
+var keyBool = new Array(128);
+
+var colors = {
+    blocks:         [
+                        "#996600",
+                        "#6688EE",
+                        "#FFCC00",
+                        "#CC9933",
+                        "#EE99CC",
+                        "#9933EE",
+                        "#BB99FF"
+                    ],
+    bg:             "#555555",
+    screenBG:       "#000000",
+    screenBlock:    "#222222"
+};
+
+var mapW = 10, mapH = 20, mapX = 10, mapY = 10, map;
+var queueDisplayX = (mapW + 1) * BlockSize, queueDisplayY = mapY;
+var gameRunning = true;
+var gameTimer;
 var pointX = 0, pointY = 0;
 var blocks = [
     [
@@ -60,22 +73,15 @@ var blocks = [
 ];
 
 var useBlock;
-var readyBlock;
-function init()
-{
-    newKey();
-    newMap();
-}
+var queueBlock;
 
-function newMap()
+function createNewMap()
 {
-    game = new Array(gameW);
-    for (var x = 0; x < gameW; x++) {
-            game[x] = new Array(gameH);
-        for (var y = 0; y < gameH; y++) {
-            game[x][y] = 0;
-
-        }
+    map = new Array(mapW);
+    for (var x = 0; x < mapW; x++) {
+            map[x] = new Array(mapH);
+        for (var y = 0; y < mapH; y++) 
+            map[x][y] = 0;
     }
     newBlock();
 }
@@ -83,40 +89,50 @@ function newMap()
 function newBlock()
 {
     var blockUse = Math.floor(Math.random() * 7);
-    readyBlock = Math.floor(Math.random() * 7);
+    queueBlock = Math.floor(Math.random() * 7);
     useBlock = new Array(4 * 4);
     for (var i = 0; i < useBlock.length; i++) {
         useBlock[i] = blocks[blockUse][i];
     }
-    pointX = gameW / 2 - 2;
+    pointX = mapW / 2 - 2;
     pointY = 0;
+}
+
+function gameStart()
+{
+    createNewMap();
+    gameRunning = true;
+    gameTimer = setInterval(gameTick, 500);
 }
 
 function main()
 {
     screen1 = document.getElementById('screen');   
     sct = screen1.getContext('2d');
-    sct.fillStyle = backGround;
-    
-    init();
-    timer = setInterval(display, 1000.0 / fps)
-    timerGame = setInterval(tick, 500)
-    clear();
+    sct.fillStyle = colors.bg;
+   
+    // init
+    // Keyboard Init
+    for (var i = 0; i < keyBool.length; i++) 
+        keyBool[i] = false;
+
+    DisplayTimer = setInterval(display, 1000.0 / fps);
+    gameStart(); 
+
     return 0; 
 }
 
-function tick()
+function gameTick()
 {
     moveDown();
 }
 
-var colors = ["#996600","#6688EE","#FFCC00","#CC9933","#EE99CC","#9933EE","#BB99FF"];
 function blockPaint(onScreenX, onScreenY, x, y, useBlackground)
 {
     if (useBlackground == 0) {
-            sct.fillStyle = noBlockColor;
+            sct.fillStyle = colors.screenBlock;
     } else {
-            sct.fillStyle = colors[useBlackground - 1];
+            sct.fillStyle = colors.blocks[useBlackground - 1];
     }
     sct.fillRect(onScreenX + (BlockSize) * x + 1, onScreenY + (BlockSize) * y + 1, BlockSize - 2, BlockSize - 2);
 }
@@ -124,16 +140,16 @@ function blockPaint(onScreenX, onScreenY, x, y, useBlackground)
 function display()
 {
     // clean
-    sct.fillStyle = backGround;
+    sct.fillStyle = colors.bg;
     sct.fillRect(0, 0, w, h);
 
     // Display background 
-    sct.fillStyle = blockBackGroundColor;
-    sct.fillRect(gameX, gameY, BlockSize * gameW, BlockSize * gameH);
+    sct.fillStyle = colors.screenBG;
+    sct.fillRect(mapX, mapY, BlockSize * mapW, BlockSize * mapH);
     
-    for (var x = 0; x < gameW; x++) {
-        for (var y = 0; y < gameH; y++) {
-            blockPaint(gameX, gameY, x, y, game[x][y]);
+    for (var x = 0; x < mapW; x++) {
+        for (var y = 0; y < mapH; y++) {
+            blockPaint(mapX, mapY, x, y, map[x][y]);
         }
     }
 
@@ -141,12 +157,12 @@ function display()
     for (var x = 0; x < 4; x++) {
         for (var y = 0; y < 4; y++) {
             // Block queue
-            if(blocks[readyBlock][x + y * 4] != 0) {
-                blockPaint(readyDisplayX, readyDisplayY, x, y, blocks[readyBlock][x + y * 4]);    
+            if(blocks[queueBlock][x + y * 4] != 0) {
+                blockPaint(queueDisplayX, queueDisplayY, x, y, blocks[queueBlock][x + y * 4]);    
             }   
             // Block current
             if (useBlock[x + y * 4] != 0) {
-                blockPaint(gameX, gameY, pointX + x, pointY + y, useBlock[x + y * 4]);    
+                blockPaint(mapX, mapY, pointX + x, pointY + y, useBlock[x + y * 4]);    
             }
         }
     }
@@ -154,8 +170,8 @@ function display()
 
 function gameOver()
 {
-    gameStart = false;
-    window.clearInterval(timerGame);
+    gameRunning = false;
+    window.clearInterval(gameTimer);
 }
 
 function collisionTest(addX, addY)
@@ -163,12 +179,12 @@ function collisionTest(addX, addY)
     for (var x = 0; x < 4; x++) {
         for (var y = 0; y < 4; y++) {
             if (useBlock[x + y * 4] != 0) {
-                if (pointX + x + addX <  0     ||
-                    pointX + x + addX >= gameW ||
-                    pointY + y + addY >= gameH )
+                if (pointX + x + addX <  0    ||
+                    pointX + x + addX >= mapW ||
+                    pointY + y + addY >= mapH )
                 {
                     return true;
-                } else if (game[pointX + x + addX][pointY + y + addY] != 0) {
+                } else if (map[pointX + x + addX][pointY + y + addY] != 0) {
                     return true;
                 }
             }
@@ -182,13 +198,6 @@ function lineTest()
 
 }
 //event
-var keyBool = new Array(128);
-function newKey()
-{
-    for (var i = 0; i < keyBool.length; i++) {
-        keyBool[i] = false;
-    }
-}
 
 function rotate() 
 {
@@ -209,7 +218,7 @@ function moveLeft()
 
 function moveDown()
 {
-    if (gameStart == true) {
+    if (gameRunning == true) {
         if (!collisionTest(0, 1))
             pointY++;
         else {
@@ -218,7 +227,7 @@ function moveDown()
             for (var x = 0; x < 4; x++) {
                 for (var y = 0; y < 4; y++) {
                     if (useBlock[x + y * 4] != 0) {
-                        game[pointX + x][pointY + y] = useBlock[x + y * 4];
+                        map[pointX + x][pointY + y] = useBlock[x + y * 4];
                     }
                 }
                 lineTest();
@@ -228,7 +237,8 @@ function moveDown()
     }
 }
 
-function keyDown(e){
+function keyDown(e)
+{
     e = e || window.event;
 
     if (e.keyCode < 128) {
@@ -266,9 +276,9 @@ function keyUp(e)
         }
     }
 }
-window.onload=main;
-window.onkeydown=keyDown;
-window.onkeyup=keyUp;
+window.onload    = main;
+window.onkeydown = keyDown;
+window.onkeyup   = keyUp;
 </script>
 <br>
 The game is not done.
