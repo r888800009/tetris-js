@@ -1,5 +1,5 @@
 <canvas id="screen" width="600" height="600" style="border:1px solid #555555;"></canvas>
-<script >
+<script>
 var screen;
 var sct;      
 var w = 600, h = 600;  
@@ -110,25 +110,7 @@ function tick()
     moveDown();
 }
 
-function clear() 
-{
-    sct.fillStyle = backGround;
-    sct.fillRect(0, 0, w, h);
-}
-
-function gameDisplay()
-{
-    sct.fillStyle = blockBackGroundColor;
-    sct.fillRect(gameX, gameY, BlockSize * gameW, BlockSize * gameH);
-    
-    for (var x = 0; x < gameW; x++) {
-        for (var y = 0; y < gameH; y++) {
-            blockPaint(gameX, gameY, x, y, game[x][y]);
-        }
-    }
-}
-
-var colors=["#996600","#6688EE","#FFCC00","#CC9933","#EE99CC","#9933EE","#BB99FF"];
+var colors = ["#996600","#6688EE","#FFCC00","#CC9933","#EE99CC","#9933EE","#BB99FF"];
 function blockPaint(onScreenX, onScreenY, x, y, useBlackground)
 {
     if (useBlackground == 0) {
@@ -139,34 +121,35 @@ function blockPaint(onScreenX, onScreenY, x, y, useBlackground)
     sct.fillRect(onScreenX + (BlockSize) * x + 1, onScreenY + (BlockSize) * y + 1, BlockSize - 2, BlockSize - 2);
 }
 
-function readyDisplay()
+function display()
 {
+    // clean
+    sct.fillStyle = backGround;
+    sct.fillRect(0, 0, w, h);
+
+    // Display background 
+    sct.fillStyle = blockBackGroundColor;
+    sct.fillRect(gameX, gameY, BlockSize * gameW, BlockSize * gameH);
+    
+    for (var x = 0; x < gameW; x++) {
+        for (var y = 0; y < gameH; y++) {
+            blockPaint(gameX, gameY, x, y, game[x][y]);
+        }
+    }
+
+    // Display 
     for (var x = 0; x < 4; x++) {
         for (var y = 0; y < 4; y++) {
+            // Block queue
             if(blocks[readyBlock][x + y * 4] != 0) {
                 blockPaint(readyDisplayX, readyDisplayY, x, y, blocks[readyBlock][x + y * 4]);    
             }   
-        }
-   }
-}
-
-function pointDisplay()
-{
-    for (var x = 0; x < 4; x++) {
-        for (var y = 0; y < 4; y++) {
+            // Block current
             if (useBlock[x + y * 4] != 0) {
                 blockPaint(gameX, gameY, pointX + x, pointY + y, useBlock[x + y * 4]);    
             }
         }
     }
-}
-
-function display()
-{
-    clear();
-    gameDisplay();
-    readyDisplay();
-    pointDisplay();
 }
 
 function gameOver()
