@@ -79,7 +79,7 @@ function createNewMap()
 {
     map = new Array(mapW);
     for (var x = 0; x < mapW; x++) {
-            map[x] = new Array(mapH);
+        map[x] = new Array(mapH);
         for (var y = 0; y < mapH; y++) 
             map[x][y] = 0;
     }
@@ -91,9 +91,10 @@ function newBlock()
     var blockUse = Math.floor(Math.random() * 7);
     queueBlock = Math.floor(Math.random() * 7);
     useBlock = new Array(4 * 4);
-    for (var i = 0; i < useBlock.length; i++) {
+
+    for (var i = 0; i < useBlock.length; i++) 
         useBlock[i] = blocks[blockUse][i];
-    }
+   
     pointX = mapW / 2 - 2;
     pointY = 0;
 }
@@ -129,12 +130,14 @@ function gameTick()
 
 function blockPaint(onScreenX, onScreenY, x, y, useBlackground)
 {
-    if (useBlackground == 0) {
-            sct.fillStyle = colors.screenBlock;
-    } else {
-            sct.fillStyle = colors.blocks[useBlackground - 1];
-    }
-    sct.fillRect(onScreenX + (BlockSize) * x + 1, onScreenY + (BlockSize) * y + 1, BlockSize - 2, BlockSize - 2);
+    if (useBlackground == 0)
+        sct.fillStyle = colors.screenBlock;
+    else 
+        sct.fillStyle = colors.blocks[useBlackground - 1];
+
+    sct.fillRect(onScreenX + (BlockSize) * x + 1,
+                 onScreenY + (BlockSize) * y + 1,
+                 BlockSize - 2, BlockSize - 2);
 }
 
 function display()
@@ -158,11 +161,14 @@ function display()
         for (var y = 0; y < 4; y++) {
             // Block queue
             if(blocks[queueBlock][x + y * 4] != 0) {
-                blockPaint(queueDisplayX, queueDisplayY, x, y, blocks[queueBlock][x + y * 4]);    
-            }   
+                blockPaint(queueDisplayX, queueDisplayY, x, y,
+                           blocks[queueBlock][x + y * 4]);    
+            }
+
             // Block current
             if (useBlock[x + y * 4] != 0) {
-                blockPaint(mapX, mapY, pointX + x, pointY + y, useBlock[x + y * 4]);    
+                blockPaint(mapX, mapY, pointX + x, pointY + y,
+                           useBlock[x + y * 4]);    
             }
         }
     }
@@ -178,16 +184,19 @@ function collisionTest(addX, addY)
 {
     for (var x = 0; x < 4; x++) {
         for (var y = 0; y < 4; y++) {
-            if (useBlock[x + y * 4] != 0) {
-                if (pointX + x + addX <  0    ||
-                    pointX + x + addX >= mapW ||
-                    pointY + y + addY >= mapH )
-                {
-                    return true;
-                } else if (map[pointX + x + addX][pointY + y + addY] != 0) {
-                    return true;
-                }
+
+            if (useBlock[x + y * 4] == 0) 
+                continue;
+            
+            if (pointX + x + addX <  0    ||
+                pointX + x + addX >= mapW ||
+                pointY + y + addY >= mapH )
+            {
+                return true;
             }
+            else if (map[pointX + x + addX][pointY + y + addY] != 0)
+                return true;
+            
         }
     }
     return false;
@@ -218,22 +227,23 @@ function moveLeft()
 
 function moveDown()
 {
-    if (gameRunning == true) {
-        if (!collisionTest(0, 1))
-            pointY++;
-        else {
-            if (pointY == 0)
-                gameOver();
-            for (var x = 0; x < 4; x++) {
-                for (var y = 0; y < 4; y++) {
-                    if (useBlock[x + y * 4] != 0) {
-                        map[pointX + x][pointY + y] = useBlock[x + y * 4];
-                    }
-                }
-                lineTest();
+    if (gameRunning == false) 
+        return;
+    
+    if (!collisionTest(0, 1))
+        pointY++;
+    else {
+        if (pointY == 0)
+            gameOver();
+        
+        for (var x = 0; x < 4; x++) {
+            for (var y = 0; y < 4; y++) {
+                if (useBlock[x + y * 4] != 0)
+                    map[pointX + x][pointY + y] = useBlock[x + y * 4];
             }
-            newBlock();
+            lineTest();
         }
+        newBlock();
     }
 }
 
@@ -241,47 +251,49 @@ function keyDown(e)
 {
     e = e || window.event;
 
-    if (e.keyCode < 128) {
-        if (keyBool[e.keyCode] == false) {
-            keyBool[e.keyCode] == true;
-            console.log("keyDown");
-            
-            if([38, 40, 37, 39].indexOf(e.keyCode) > -1) {
-                e.preventDefault();
-            }
 
-            if (e.keyCode == '38') //up
-                rotate();
-            
-            if (e.keyCode == '40') //down
-                moveDown();
-            
-            if (e.keyCode == '37') //left
-                moveLeft();
-            
-            if (e.keyCode == '39') //right
-                moveRight();
-        }
-
+    if (!(e.keyCode < 128) || keyBool[e.keyCode] == true) 
+    {
+        return;
     }
+
+    keyBool[e.keyCode] == true;
+    console.log("keyDown");
+    
+    if([38, 40, 37, 39].indexOf(e.keyCode) > -1) 
+        e.preventDefault();
+
+    if (e.keyCode == '38') // up
+        rotate();
+    
+    if (e.keyCode == '40') // down
+        moveDown();
+    
+    if (e.keyCode == '37') // left
+        moveLeft();
+    
+    if (e.keyCode == '39') // right
+        moveRight();
+    
 }
 
 function keyUp(e)
 {
     e = e || window.event;
 
-    if (e.keyCode < 128) {
-        if (keyBool[e.keyCode] == true) {
-            keyBool[e.keyCode] == false;
-        }
-    }
+    if (e.keyCode < 128 && keyBool[e.keyCode] == true) 
+        keyBool[e.keyCode] == false;
+    
 }
+
 window.onload    = main;
 window.onkeydown = keyDown;
 window.onkeyup   = keyUp;
 </script>
 <br>
 The game is not done.
-<a href="https://github.com/r888800009/tetris-js"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+<a href="https://github.com/r888800009/tetris-js">
+    <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+</a>
 <br>
 <a href="https://github.com/r888800009/">r888800009</a>
