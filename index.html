@@ -269,10 +269,8 @@ function keyDown(e)
     e = e || window.event;
 
 
-    if (!(e.keyCode < 128) || keyBool[e.keyCode] == true) 
-    {
+    if (!(e.keyCode < 128) || keyBool[e.keyCode] == true)
         return;
-    }
 
     keyBool[e.keyCode] == true;
     console.log("keyDown");
@@ -291,7 +289,8 @@ function keyDown(e)
     
     if (e.keyCode == '39') // right
         moveRight();
-    
+
+    display();
 }
 
 function keyUp(e)
