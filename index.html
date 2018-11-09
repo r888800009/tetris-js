@@ -4,11 +4,11 @@ var screen = {
     width: 600,
     height: 600,
     context: null,
-    blockSize: 20
+    blockSize: 20,
+    fps: 100.0
 };
 
-var fps = 100.0;
-var keyBool = new Array(128);
+var keyBool = new Array(128).fill(false);
 
 var colors = {
     blocks:         [
@@ -35,7 +35,9 @@ var map = {
     }
 };
 
-var queueDisplayX = (map.width + 1) * screen.blockSize, queueDisplayY = map.display.y;
+var queueDisplayX = (map.width + 1) * screen.blockSize,
+    queueDisplayY = map.display.y;
+
 var gameRunning = true;
 var gameTimer;
 var pointX = 0, pointY = 0;
@@ -122,17 +124,12 @@ function gameStart()
 
 function main()
 {
+    // set screen
     screen1 = document.getElementById('screen');   
     context = screen.context = screen1.getContext('2d');
 
-    context.fillStyle = colors.bg;
-
     // init
-    // Keyboard Init
-    for (var i = 0; i < keyBool.length; i++) 
-        keyBool[i] = false;
-
-    DisplayTimer = setInterval(display, 1000.0 / fps);
+    DisplayTimer = setInterval(display, 1000.0 / screen.fps);
     gameStart(); 
 
     return 0; 
@@ -159,21 +156,21 @@ function blockPaint(onScreenX, onScreenY, x, y, useBlackground)
 function display()
 {
     context = screen.context;
-    // clean
+    // clean screen
     context.fillStyle = colors.bg;
     context.fillRect(0, 0, screen.width, screen.height);
 
-    // Display background 
+    // Display background
     context.fillStyle = colors.screenBG;
     context.fillRect(map.display.x, map.display.y, screen.blockSize * map.width, screen.blockSize * map.height);
-    
+
     for (var x = 0; x < map.width; x++) {
         for (var y = 0; y < map.height; y++) {
             blockPaint(map.display.x, map.display.y, x, y, map.data[x][y]);
         }
     }
 
-    // Display 
+    // Display blocks
     for (var x = 0; x < 4; x++) {
         for (var y = 0; y < 4; y++) {
             // Block queue
