@@ -35,8 +35,12 @@ var map = {
     }
 };
 
-var gameRunning = true;
-var gameTimer;
+var game = {
+    running: true,
+    timer: null,
+    menu: null
+};
+
 var blocks = [
     [
         1,1,1,1,
@@ -125,8 +129,8 @@ function newBlock()
 function gameStart()
 {
     createNewMap();
-    gameRunning = true;
-    gameTimer = setInterval(gameTick, 500);
+    game.running = true;
+    game.timer = setInterval(gameTick, 500);
 }
 
 function gameMenu()
@@ -207,8 +211,8 @@ function display()
 
 function gameOver()
 {
-    gameRunning = false;
-    window.clearInterval(gameTimer);
+    game.running = false;
+    window.clearInterval(game.timer);
 }
 
 function collisionTest(addX, addY)
@@ -258,7 +262,7 @@ function moveLeft()
 
 function moveDown()
 {
-    if (gameRunning == false) 
+    if (game.running == false)
         return;
     
     if (!collisionTest(0, 1))
