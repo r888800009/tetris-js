@@ -37,9 +37,13 @@ var map = {
 
 var menu = {
     select: null,
-
+    background: "#000000CC",
     menuBackground: () =>
     {
+        context = screen.context;
+
+        context.fillStyle = menu.background;
+        context.fillRect(0, 0, screen.width, screen.height);
 
     },
 
@@ -53,31 +57,55 @@ var menu = {
 
     },
 
+    display: () =>
+    {
+        if (menu.select === null)
+            return;
 
-    display: () => {
+        // display menu
+        menu.menuBackground();
+        menu.select();
+
     }
 }
 
 var game = {
     running: true,
     timer: null,
+    isPause: false,
 
     start: () =>
     {
         createNewMap();
         game.running = true;
+        game.isPause = false;
+        menu.select = null;
         game.timer = setInterval(game.tick, 500);
     },
 
     gameover: () =>
     {
         game.running = false;
+        menu.select = menu.gameoverMenu;
         window.clearInterval(game.timer);
     },
 
     tick: () =>
     {
         moveDown();
+    },
+
+    pause: () =>
+    {
+        if (game.running == false)
+            return;
+
+        if (!game.isPause) // not pause ,set pause
+            menu.select = menu.menu;
+        else         // pause, resume
+            menu.select = null;
+
+        game.isPause = !game.isPause;
     }
 };
 
@@ -225,6 +253,8 @@ function display()
             }
         }
     }
+
+    menu.display();
 }
 
 function collisionTest(addX, addY)
@@ -274,7 +304,7 @@ function moveLeft()
 
 function moveDown()
 {
-    if (game.running == false)
+    if (game.running == false || game.isPause)
         return;
     
     if (!collisionTest(0, 1))
@@ -305,7 +335,7 @@ function keyDown(e)
     keyBool[e.keyCode] == true;
     console.log("keyDown");
     
-    if([38, 40, 37, 39].indexOf(e.keyCode) > -1) 
+    if([38, 40, 37, 39, 27].indexOf(e.keyCode) > -1) 
         e.preventDefault();
 
     if (e.keyCode == '38') // up
@@ -319,6 +349,9 @@ function keyDown(e)
     
     if (e.keyCode == '39') // right
         moveRight();
+
+    if (e.keyCode == '27' ) // esc pause
+        game.pause();
 
     display();
 }
