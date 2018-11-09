@@ -1,9 +1,12 @@
 <canvas id="screen" width="600" height="600" style="border:1px solid #555555;"></canvas>
 <script>
-var screen;
-var sct;      
-var w = 600, h = 600;  
-var BlockSize = 20;
+var screen = {
+    width: 600,
+    height: 600,
+    context: null,
+    blockSize: 20
+};
+
 var fps = 100.0;
 var keyBool = new Array(128);
 
@@ -31,7 +34,8 @@ var map = {
         y: 10
     }
 };
-var queueDisplayX = (map.width + 1) * BlockSize, queueDisplayY = map.display.y;
+
+var queueDisplayX = (map.width + 1) * screen.blockSize, queueDisplayY = map.display.y;
 var gameRunning = true;
 var gameTimer;
 var pointX = 0, pointY = 0;
@@ -116,9 +120,10 @@ function gameStart()
 function main()
 {
     screen1 = document.getElementById('screen');   
-    sct = screen1.getContext('2d');
-    sct.fillStyle = colors.bg;
-   
+    context = screen.context = screen1.getContext('2d');
+
+    context.fillStyle = colors.bg;
+
     // init
     // Keyboard Init
     for (var i = 0; i < keyBool.length; i++) 
@@ -137,25 +142,27 @@ function gameTick()
 
 function blockPaint(onScreenX, onScreenY, x, y, useBlackground)
 {
+    context = screen.context;
     if (useBlackground == 0)
-        sct.fillStyle = colors.screenBlock;
+        context.fillStyle = colors.screenBlock;
     else 
-        sct.fillStyle = colors.blocks[useBlackground - 1];
+        context.fillStyle = colors.blocks[useBlackground - 1];
 
-    sct.fillRect(onScreenX + (BlockSize) * x + 1,
-                 onScreenY + (BlockSize) * y + 1,
-                 BlockSize - 2, BlockSize - 2);
+    context.fillRect(onScreenX + (screen.blockSize) * x + 1,
+                 onScreenY + (screen.blockSize) * y + 1,
+                 screen.blockSize - 2, screen.blockSize - 2);
 }
 
 function display()
 {
+    context = screen.context;
     // clean
-    sct.fillStyle = colors.bg;
-    sct.fillRect(0, 0, w, h);
+    context.fillStyle = colors.bg;
+    context.fillRect(0, 0, screen.width, screen.height);
 
     // Display background 
-    sct.fillStyle = colors.screenBG;
-    sct.fillRect(map.display.x, map.display.y, BlockSize * map.width, BlockSize * map.height);
+    context.fillStyle = colors.screenBG;
+    context.fillRect(map.display.x, map.display.y, screen.blockSize * map.width, screen.blockSize * map.height);
     
     for (var x = 0; x < map.width; x++) {
         for (var y = 0; y < map.height; y++) {
