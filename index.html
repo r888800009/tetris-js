@@ -35,10 +35,50 @@ var map = {
     }
 };
 
+var menu = {
+    select: null,
+
+    menuBackground: () =>
+    {
+
+    },
+
+    menu: () =>
+    {
+
+    },
+
+    gameoverMenu: () =>
+    {
+
+    },
+
+
+    display: () => {
+    }
+}
+
 var game = {
     running: true,
     timer: null,
-    menu: null
+
+    start: () =>
+    {
+        createNewMap();
+        game.running = true;
+        game.timer = setInterval(game.tick, 500);
+    },
+
+    gameover: () =>
+    {
+        game.running = false;
+        window.clearInterval(game.timer);
+    },
+
+    tick: () =>
+    {
+        moveDown();
+    }
 };
 
 var blocks = [
@@ -126,23 +166,6 @@ function newBlock()
     useBlock.y = 0;
 }
 
-function gameStart()
-{
-    createNewMap();
-    game.running = true;
-    game.timer = setInterval(gameTick, 500);
-}
-
-function gameMenu()
-{
-
-}
-
-function gameGameOverMenu()
-{
-
-}
-
 function main()
 {
     // set screen
@@ -151,14 +174,9 @@ function main()
 
     // init
     DisplayTimer = setInterval(display, 1000.0 / screen.fps);
-    gameStart(); 
+    game.start();
 
     return 0; 
-}
-
-function gameTick()
-{
-    moveDown();
 }
 
 function blockPaint(onScreenX, onScreenY, x, y, useBlackground)
@@ -207,12 +225,6 @@ function display()
             }
         }
     }
-}
-
-function gameOver()
-{
-    game.running = false;
-    window.clearInterval(game.timer);
 }
 
 function collisionTest(addX, addY)
@@ -269,7 +281,7 @@ function moveDown()
         useBlock.y++;
     else {
         if (useBlock.y == 0)
-            gameOver();
+            game.gameover();
         
         for (var x = 0; x < 4; x++) {
             for (var y = 0; y < 4; y++) {
