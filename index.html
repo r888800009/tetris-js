@@ -93,19 +93,22 @@ function createNewMap()
     map.data = Array.from(Array(map.width),
         () => Array(map.height).fill(0));
 
+    // create block queue 5 item
+    queueBlock= Array.from(Array(5),
+        () => Math.floor(Math.random() * 7))
+
     // add first block
     newBlock();
 }
 
 function newBlock()
 {
-    var blockUse = Math.floor(Math.random() * 7);
-    queueBlock = Math.floor(Math.random() * 7);
-    useBlock = new Array(4 * 4);
+    // next block
+    var blockUse = queueBlock.shift();
+    queueBlock.push(Math.floor(Math.random() * 7));
+    useBlock = blocks[blockUse].slice();
 
-    for (var i = 0; i < useBlock.length; i++) 
-        useBlock[i] = blocks[blockUse][i];
-   
+    // put at upper center
     pointX = map.width / 2 - 2;
     pointY = 0;
 }
@@ -174,9 +177,9 @@ function display()
     for (var x = 0; x < 4; x++) {
         for (var y = 0; y < 4; y++) {
             // Block queue
-            if(blocks[queueBlock][x + y * 4] != 0) {
+            if(blocks[queueBlock[0]][x + y * 4] != 0) {
                 blockPaint(queueDisplayX, queueDisplayY, x, y,
-                           blocks[queueBlock][x + y * 4]);    
+                           blocks[queueBlock[0]][x + y * 4]);
             }
 
             // Block current
