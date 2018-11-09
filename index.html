@@ -22,8 +22,16 @@ var colors = {
     screenBlock:    "#222222"
 };
 
-var mapW = 10, mapH = 20, mapX = 10, mapY = 10, map;
-var queueDisplayX = (mapW + 1) * BlockSize, queueDisplayY = mapY;
+var map = {
+    data: null,
+    height: 20,
+    width: 10,
+    display: {
+        x: 10,
+        y: 10
+    }
+};
+var queueDisplayX = (map.width + 1) * BlockSize, queueDisplayY = map.display.y;
 var gameRunning = true;
 var gameTimer;
 var pointX = 0, pointY = 0;
@@ -77,11 +85,11 @@ var queueBlock;
 
 function createNewMap()
 {
-    map = new Array(mapW);
-    for (var x = 0; x < mapW; x++) {
-        map[x] = new Array(mapH);
-        for (var y = 0; y < mapH; y++) 
-            map[x][y] = 0;
+    map.data = new Array(map.width);
+    for (var x = 0; x < map.width; x++) {
+        map.data[x] = new Array(map.height);
+        for (var y = 0; y < map.height; y++) 
+            map.data[x][y] = 0;
     }
     newBlock();
 }
@@ -95,7 +103,7 @@ function newBlock()
     for (var i = 0; i < useBlock.length; i++) 
         useBlock[i] = blocks[blockUse][i];
    
-    pointX = mapW / 2 - 2;
+    pointX = map.width / 2 - 2;
     pointY = 0;
 }
 
@@ -148,11 +156,11 @@ function display()
 
     // Display background 
     sct.fillStyle = colors.screenBG;
-    sct.fillRect(mapX, mapY, BlockSize * mapW, BlockSize * mapH);
+    sct.fillRect(map.display.x, map.display.y, BlockSize * map.width, BlockSize * map.height);
     
-    for (var x = 0; x < mapW; x++) {
-        for (var y = 0; y < mapH; y++) {
-            blockPaint(mapX, mapY, x, y, map[x][y]);
+    for (var x = 0; x < map.width; x++) {
+        for (var y = 0; y < map.height; y++) {
+            blockPaint(map.display.x, map.display.y, x, y, map.data[x][y]);
         }
     }
 
@@ -167,7 +175,7 @@ function display()
 
             // Block current
             if (useBlock[x + y * 4] != 0) {
-                blockPaint(mapX, mapY, pointX + x, pointY + y,
+                blockPaint(map.display.x, map.display.y, pointX + x, pointY + y,
                            useBlock[x + y * 4]);    
             }
         }
@@ -189,12 +197,12 @@ function collisionTest(addX, addY)
                 continue;
             
             if (pointX + x + addX <  0    ||
-                pointX + x + addX >= mapW ||
-                pointY + y + addY >= mapH )
+                pointX + x + addX >= map.width ||
+                pointY + y + addY >= map.height )
             {
                 return true;
             }
-            else if (map[pointX + x + addX][pointY + y + addY] != 0)
+            else if (map.data[pointX + x + addX][pointY + y + addY] != 0)
                 return true;
             
         }
@@ -239,7 +247,7 @@ function moveDown()
         for (var x = 0; x < 4; x++) {
             for (var y = 0; y < 4; y++) {
                 if (useBlock[x + y * 4] != 0)
-                    map[pointX + x][pointY + y] = useBlock[x + y * 4];
+                    map.data[pointX + x][pointY + y] = useBlock[x + y * 4];
             }
             lineTest();
         }
