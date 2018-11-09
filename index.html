@@ -35,12 +35,8 @@ var map = {
     }
 };
 
-var queueDisplayX = (map.width + 1) * screen.blockSize,
-    queueDisplayY = map.display.y;
-
 var gameRunning = true;
 var gameTimer;
-var pointX = 0, pointY = 0;
 var blocks = [
     [
         1,1,1,1,
@@ -86,8 +82,19 @@ var blocks = [
     ],
 ];
 
-var useBlock;
-var queueBlock;
+var useBlock = {
+    data: null,
+    x: 0,
+    y: 0
+}
+
+var queue = {
+    block: [],
+    display: {
+        x: (map.width + 1) * screen.blockSize,
+        y: map.display.y
+    }
+}
 
 function createNewMap()
 {
@@ -96,7 +103,7 @@ function createNewMap()
         () => Array(map.height).fill(0));
 
     // create block queue 5 item
-    queueBlock= Array.from(Array(5),
+    queue.block= Array.from(Array(5),
         () => Math.floor(Math.random() * 7))
 
     // add first block
@@ -106,13 +113,13 @@ function createNewMap()
 function newBlock()
 {
     // next block
-    var blockUse = queueBlock.shift();
-    queueBlock.push(Math.floor(Math.random() * 7));
-    useBlock = blocks[blockUse].slice();
+    var blockUse = queue.block.shift();
+    queue.block.push(Math.floor(Math.random() * 7));
+    useBlock.data = blocks[blockUse].slice();
 
     // put at upper center
-    pointX = map.width / 2 - 2;
-    pointY = 0;
+    useBlock.x = map.width / 2 - 2;
+    useBlock.y = 0;
 }
 
 function gameStart()
@@ -184,15 +191,15 @@ function display()
     for (var x = 0; x < 4; x++) {
         for (var y = 0; y < 4; y++) {
             // Block queue
-            if(blocks[queueBlock[0]][x + y * 4] != 0) {
-                blockPaint(queueDisplayX, queueDisplayY, x, y,
-                           blocks[queueBlock[0]][x + y * 4]);
+            if(blocks[queue.block[0]][x + y * 4] != 0) {
+                blockPaint(queue.display.x, queue.display.y, x, y,
+                           blocks[queue.block[0]][x + y * 4]);
             }
 
             // Block current
-            if (useBlock[x + y * 4] != 0) {
-                blockPaint(map.display.x, map.display.y, pointX + x, pointY + y,
-                           useBlock[x + y * 4]);    
+            if (useBlock.data[x + y * 4] != 0) {
+                blockPaint(map.display.x, map.display.y, useBlock.x + x, useBlock.y + y,
+                           useBlock.data[x + y * 4]); 
             }
         }
     }
@@ -209,16 +216,16 @@ function collisionTest(addX, addY)
     for (var x = 0; x < 4; x++) {
         for (var y = 0; y < 4; y++) {
 
-            if (useBlock[x + y * 4] == 0) 
+            if (useBlock.data[x + y * 4] == 0)
                 continue;
             
-            if (pointX + x + addX <  0    ||
-                pointX + x + addX >= map.width ||
-                pointY + y + addY >= map.height )
+            if (useBlock.x + x + addX <  0    ||
+                useBlock.x + x + addX >= map.width ||
+                useBlock.y + y + addY >= map.height )
             {
                 return true;
             }
-            else if (map.data[pointX + x + addX][pointY + y + addY] != 0)
+            else if (map.data[useBlock.x + x + addX][useBlock.y + y + addY] != 0)
                 return true;
             
         }
@@ -240,13 +247,13 @@ function rotate()
 function moveRight() 
 {
     if (!collisionTest(1, 0))
-        pointX++;
+        useBlock.x++;
 }
 
 function moveLeft() 
 {
     if (!collisionTest(-1, 0))
-        pointX--;
+        useBlock.x--;
 }
 
 function moveDown()
@@ -255,15 +262,15 @@ function moveDown()
         return;
     
     if (!collisionTest(0, 1))
-        pointY++;
+        useBlock.y++;
     else {
-        if (pointY == 0)
+        if (useBlock.y == 0)
             gameOver();
         
         for (var x = 0; x < 4; x++) {
             for (var y = 0; y < 4; y++) {
-                if (useBlock[x + y * 4] != 0)
-                    map.data[pointX + x][pointY + y] = useBlock[x + y * 4];
+                if (useBlock.data[x + y * 4] != 0)
+                    map.data[useBlock.x + x][useBlock.y + y] = useBlock.data[x + y * 4];
             }
             lineTest();
         }
