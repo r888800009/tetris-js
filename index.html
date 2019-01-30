@@ -111,54 +111,69 @@ var game = {
 };
 
 var blocks = [
-    [
-        1,1,1,1,
-        0,0,0,0,
-        0,0,0,0,
-        0,0,0,0
-    ],
-    [
-        2,2,2,0,
-        0,0,2,0,
-        0,0,0,0,
-        0,0,0,0
-    ],
-    [
-        3,3,3,0,
-        3,0,0,0,
-        0,0,0,0,
-        0,0,0,0
-    ],
-    [
-        4,4,0,0,
-        4,4,0,0,
-        0,0,0,0,
-        0,0,0,0
-    ],
-    [
-        0,5,5,0,
-        5,5,0,0,
-        0,0,0,0,
-        0,0,0,0
-    ],
-    [
-        6,6,6,0,
-        0,6,0,0,
-        0,0,0,0,
-        0,0,0,0
-    ],
-    [
-        7,7,0,0,
-        0,7,7,0,
-        0,0,0,0,
-        0,0,0,0
-    ],
+    {
+        data: [
+            0,0,0,0,
+            1,1,1,1,
+            0,0,0,0,
+            0,0,0,0
+        ],
+        w: 4
+    },
+    {
+        data: [
+            2,0,0,
+            2,2,2,
+            0,0,0,
+        ],
+        w: 3
+    },
+    {
+        data: [
+            0,0,3,
+            3,3,3,
+            0,0,0,
+        ],
+        w: 3
+    },
+    {
+        data: [
+            4,4,
+            4,4,
+        ],
+        w: 2
+    },
+    {
+        data: [
+            0,5,5,
+            5,5,0,
+            0,0,0,
+        ],
+        w: 3
+    },
+    {
+        data: [
+            0,6,0,
+            6,6,6,
+            0,0,0,
+        ],
+        w: 3
+    },
+    {
+        data: [
+            7,7,0,
+            0,7,7,
+            0,0,0,
+        ],
+        w: 3
+    }
 ];
 
 // useBlock is current dropping block
 var useBlock = {
-    // data is 4 * 4 block array
+    // data is 2D block array
     data: null,
+    w: 0,
     x: 0,
     y: 0
 }
@@ -192,10 +207,11 @@ function newBlock()
     // next block
     var blockUse = queue.block.shift();
     queue.block.push(Math.floor(Math.random() * 7));
-    useBlock.data = blocks[blockUse].slice();
+    useBlock.data = blocks[blockUse].data.slice();
+    useBlock.w = blocks[blockUse].w;
 
     // put at upper center
-    useBlock.x = map.width / 2 - 2;
+    useBlock.x = map.width / 2 - useBlock.w;
     useBlock.y = 0;
 }
 
@@ -242,19 +258,25 @@ function display()
         }
     }
 
-    // Display blocks
-    for (var x = 0; x < 4; x++) {
-        for (var y = 0; y < 4; y++) {
-            // Block queue
-            if(blocks[queue.block[0]][x + y * 4] != 0) {
+    // Display block queue
+    var blockW = blocks[queue.block[0]].w;
+    for (var x = 0; x < blockW; x++) {
+        for (var y = 0; y < blockW; y++) {
+            
+            if(blocks[queue.block[0]].data[x + y * blockW] != 0) {
                 blockPaint(queue.display.x, queue.display.y, x, y,
-                           blocks[queue.block[0]][x + y * 4]);
+                           blocks[queue.block[0]].data[x + y * blockW]);
             }
+        }
+    }
 
-            // Block current
-            if (useBlock.data[x + y * 4] != 0) {
+    // Display block current
+    for (var x = 0; x < useBlock.w; x++) {
+        for (var y = 0; y < useBlock.w; y++) {
+            
+            if (useBlock.data[x + y * useBlock.w] != 0) {
                 blockPaint(map.display.x, map.display.y, useBlock.x + x, useBlock.y + y,
-                           useBlock.data[x + y * 4]); 
+                           useBlock.data[x + y * useBlock.w]);
             }
         }
     }
@@ -264,10 +286,10 @@ function display()
 
 function collisionTest(addX, addY)
 {
-    for (var x = 0; x < 4; x++) {
-        for (var y = 0; y < 4; y++) {
+    for (var x = 0; x < useBlock.w; x++) {
+        for (var y = 0; y < useBlock.w; y++) {
 
-            if (useBlock.data[x + y * 4] == 0)
+            if (useBlock.data[x + y * useBlock.w] == 0)
                 continue;
             
             if (useBlock.x + x + addX <  0    ||
@@ -312,10 +334,10 @@ function putBlock()
     if (useBlock.y == 0)
         game.gameover();
 
-    for (var x = 0; x < 4; x++) {
-        for (var y = 0; y < 4; y++) {
-            if (useBlock.data[x + y * 4] != 0)
-                map.data[useBlock.x + x][useBlock.y + y] = useBlock.data[x + y * 4];
+    for (var x = 0; x < useBlock.w; x++) {
+        for (var y = 0; y < useBlock.w; y++) {
+            if (useBlock.data[x + y * useBlock.w] != 0)
+                map.data[useBlock.x + x][useBlock.y + y] = useBlock.data[x + y * useBlock.w];
         }
         lineTest();
     }
