@@ -284,21 +284,21 @@ function display()
     menu.display();
 }
 
-function collisionTest(addX, addY)
+function collisionTest(addX, addY, blockData = useBlock)
 {
-    for (var x = 0; x < useBlock.w; x++) {
-        for (var y = 0; y < useBlock.w; y++) {
+    for (var x = 0; x < blockData.w; x++) {
+        for (var y = 0; y < blockData.w; y++) {
 
-            if (useBlock.data[x + y * useBlock.w] == 0)
+            if (blockData.data[x + y * blockData.w] == 0)
                 continue;
             
-            if (useBlock.x + x + addX <  0    ||
-                useBlock.x + x + addX >= map.width ||
-                useBlock.y + y + addY >= map.height )
+            if (blockData.x + x + addX <  0    ||
+                blockData.x + x + addX >= map.width ||
+                blockData.y + y + addY >= map.height )
             {
                 return true;
             }
-            else if (map.data[useBlock.x + x + addX][useBlock.y + y + addY] != 0)
+            else if (map.data[blockData.x + x + addX][blockData.y + y + addY] != 0)
                 return true;
             
         }
@@ -312,9 +312,25 @@ function lineTest()
 }
 //event
 
-function rotate() 
+function rotate()
 {
+    var tmpBlock = JSON.parse(JSON.stringify(useBlock));
 
+    // clockwise rotate
+    for (var x = 0; x < useBlock.w; x++) {
+        for (var y = 0; y < useBlock.w; y++) {
+            tmpBlock.data[useBlock.w - 1 - y + x * useBlock.w] =
+                useBlock.data[x + y * useBlock.w];
+        }
+    }
+
+    // check collision
+    if (collisionTest(0, 0, tmpBlock))
+        return;
+
+    // swap data
+    useBlock = JSON.parse(JSON.stringify(tmpBlock));
+    tmpBlock = null;
 }
 
 function moveRight() 
