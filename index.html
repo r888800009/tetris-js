@@ -302,26 +302,42 @@ function moveLeft()
         useBlock.x--;
 }
 
+function putBlock()
+{
+    if (useBlock.y == 0)
+        game.gameover();
+
+    for (var x = 0; x < 4; x++) {
+        for (var y = 0; y < 4; y++) {
+            if (useBlock.data[x + y * 4] != 0)
+                map.data[useBlock.x + x][useBlock.y + y] = useBlock.data[x + y * 4];
+        }
+        lineTest();
+    }
+
+    newBlock();
+}
+
 function moveDown()
 {
     if (game.running == false || game.isPause)
         return;
-    
+
     if (!collisionTest(0, 1))
         useBlock.y++;
-    else {
-        if (useBlock.y == 0)
-            game.gameover();
-        
-        for (var x = 0; x < 4; x++) {
-            for (var y = 0; y < 4; y++) {
-                if (useBlock.data[x + y * 4] != 0)
-                    map.data[useBlock.x + x][useBlock.y + y] = useBlock.data[x + y * 4];
-            }
-            lineTest();
-        }
-        newBlock();
-    }
+    else
+        putBlock();
+}
+
+function hardDrop()
+{
+    if (game.running == false || game.isPause)
+        return;
+
+    console.log("harddrop");
+    while (!collisionTest(0, 1))
+        useBlock.y++;
+    putBlock();
 }
 
 function keyDown(e)
@@ -335,7 +351,7 @@ function keyDown(e)
     keyBool[e.keyCode] == true;
     console.log("keyDown");
     
-    if([38, 40, 37, 39, 27].indexOf(e.keyCode) > -1) 
+    if([38, 40, 37, 39, 32, 27].indexOf(e.keyCode) > -1)
         e.preventDefault();
 
     if (e.keyCode == '38') // up
@@ -349,6 +365,9 @@ function keyDown(e)
     
     if (e.keyCode == '39') // right
         moveRight();
+
+    if (e.keyCode == '32') // space bar
+        hardDrop();
 
     if (e.keyCode == '27' ) // esc pause
         game.pause();
