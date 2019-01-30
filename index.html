@@ -155,13 +155,17 @@ var blocks = [
     ],
 ];
 
+// useBlock is current dropping block
 var useBlock = {
+    // data is 4 * 4 block array
     data: null,
     x: 0,
     y: 0
 }
 
+// queue is next dropping block queue
 var queue = {
+    // type of next drop block
     block: [],
     display: {
         x: (map.width + 1) * screen.blockSize,
