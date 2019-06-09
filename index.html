@@ -308,7 +308,30 @@ function collisionTest(addX, addY, blockData = useBlock)
 
 function lineTest()
 {
+    var dst = -1;
+    for (var y = map.height - 1; y >= 0; y--) {
+        // check is one line than remove
+        var isLine = true;
+        for (var x = 0; x < map.width; x++) {
+            if (map.data[x][y] === 0)
+                isLine = false;
+         }
 
+        if (isLine) {
+            for (var x = 0; x < map.width; x++)
+                map.data[x][y] = 0;
+            if (dst == -1)
+                dst = y;
+        } else if (dst != -1){
+            // move down
+            for (var x = 0; x < map.width; x++) {
+                var tmp = map.data[x][y];
+                map.data[x][y] = map.data[x][dst];
+                map.data[x][dst] = tmp;
+            }
+            dst--;
+        }
+    }
 }
 //event
 
@@ -355,9 +378,9 @@ function putBlock()
             if (useBlock.data[x + y * useBlock.w] != 0)
                 map.data[useBlock.x + x][useBlock.y + y] = useBlock.data[x + y * useBlock.w];
         }
-        lineTest();
     }
 
+    lineTest();
     newBlock();
 }
 
